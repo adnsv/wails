@@ -65,6 +65,43 @@ type ScreenSize struct {
 	Height int `json:"height"`
 }
 
+// ScreenRect represents a rectangle in screen units
+type ScreenRect struct {
+	X      int `json:"x"`
+	Y      int `json:"y"`
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+// MonitorInfo provides information about a monitor and its coordinate spaces
+type MonitorInfo struct {
+	// Monitor bounds in screen units
+	Bounds ScreenRect
+
+	// Work area bounds in screen units
+	WorkArea ScreenRect
+
+	// Scale factor for mapping from screen units to logical units
+	// - Windows: DPI scale (96 DPI = 1.0, 192 DPI = 2.0)
+	// - Linux: Scale factor (1, 2, etc.)
+	// - macOS: Always 1.0
+	//
+	// To convert:
+	// screen = logical * Scale
+	// logical = screen / Scale
+	Scale float64
+}
+
+type WindowState int
+
+const (
+	WindowStateUnknown WindowState = iota
+	WindowStateNormal
+	WindowStateMinimized
+	WindowStateMaximized
+	WindowStateFullscreen
+)
+
 // MessageDialogOptions contains the options for the Message dialogs, EG Info, Warning, etc runtime methods
 type MessageDialogOptions struct {
 	Type          DialogType
@@ -122,9 +159,12 @@ type Frontend interface {
 	WindowIsFullscreen() bool
 	WindowClose()
 	WindowPrint()
+	WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo, state WindowState)
+	WindowSetBounds(bounds ScreenRect)
 
 	// Screen
 	ScreenGetAll() ([]Screen, error)
+	MonitorGetAll() ([]MonitorInfo, error)
 
 	// Menus
 	MenuSetApplicationMenu(menu *menu.Menu)

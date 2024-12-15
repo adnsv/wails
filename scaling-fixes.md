@@ -64,13 +64,16 @@ Inderstanding "Effective" DPI terminology:
 ## Implementation Strategy
 
 ### Phase 1: Minimal Invasion
+
 1. **New Coordinate Management Layer**
+
    - Add new functions for handling window positioning without modifying
      existing code
    - Implement platform-specific coordinate conversion utilities
    - Maintain backward compatibility with current behavior
 
 2. **Position Management**
+
    - Windows: Add work area and DPI-aware positioning
    - Linux: Handle window manager positioning through GTK
    - macOS: Ensure consistent point-based positioning
@@ -86,11 +89,13 @@ Inderstanding "Effective" DPI terminology:
 ### Phase 2: Constraint Management
 
 1. **Size Constraints**
+
    - Store constraints in logical pixels
    - Add proper scaling for physical constraints
    - Implement per-monitor constraint adjustment
 
 2. **Platform-Specific Improvements**
+
    - Windows: Proper DPI scaling for min/max sizes
    - Linux: Proper GTK window manager integration
    - macOS: Backing scale factor consideration
@@ -102,9 +107,9 @@ Inderstanding "Effective" DPI terminology:
 
 ## Implementation Steps
 
-For window positioning, we will use screen units by default. This approach aligns with
-display manager expectations and ensures consistent window placement by avoiding
-rounding errors.
+For window positioning, we will use screen units by default. This approach
+aligns with display manager expectations and ensures consistent window placement
+by avoiding rounding errors.
 
 ### API for querying monitor information
 
@@ -120,16 +125,16 @@ type ScreenRect struct {
 // MonitorInfo provides information about a monitor and its coordinate spaces
 type MonitorInfo struct {
     // Monitor bounds in screen units
-    Bounds ScreenRect 
+    Bounds ScreenRect
 
     // Work area bounds in screen units
-    WorkArea ScreenRect 
+    WorkArea ScreenRect
 
     // Scale factor for mapping from screen units to logical units
     // - Windows: DPI scale (96 DPI = 1.0, 192 DPI = 2.0)
     // - Linux: Scale factor (1, 2, etc.)
     // - macOS: Always 1.0
-    // 
+    //
     // To convert:
     // screen = logical * Scale
     // logical = screen / Scale
@@ -147,26 +152,14 @@ type WindowState int
 
 const (
     WindowStateUnknown WindowState = iota
-    WindowStateNormal 
+    WindowStateNormal
     WindowStateMinimized
     WindowStateMaximized
     WindowStateFullscreen
 )
 
-// WindowPlacement provides the current placement of a window
-type WindowPlacement struct {
-    // Window bounds in screen units
-    Bounds ScreenRect
-
-    // Monitor the window is currently on
-    Monitor MonitorInfo
-
-    // Window state (normal, maximized, minimized, fullscreen)
-    State WindowState
-}
-
 // WindowGetPlacement returns the current placement of the window
-func WindowGetPlacement() WindowPlacement
+func WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo, state WindowState)
 ```
 
 ### API for setting placement for a window
@@ -188,19 +181,20 @@ WindowSetNormal()
 ### Implementation Phase 1
 
 - Add new types to frontend.go:
+
   - `ScreenRect`
   - `MonitorInfo`
-  - `WindowState`
 
 - Add new function to the FrontEnd interface in frontend.go:
 
 ```go
 func MonitorGetAll() ([]MonitorInfo, error)
-func WindowGetPlacement() WindowPlacement
+func WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo, state WindowState)
 func WindowSetBounds(bounds ScreenRect)
 ```
 
 - Implement support for monitor enumeration (new methods):
+
   - windows: v2/internal/frontend/desktop/windows/monitor.go
   - linux: v2/internal/frontend/desktop/linux/monitor.go
   - darwin: v2/internal/frontend/desktop/darwin/monitor.go
@@ -209,4 +203,3 @@ func WindowSetBounds(bounds ScreenRect)
   - windows: v2/internal/frontend/desktop/windows/window_extra.go
   - linux: v2/internal/frontend/desktop/linux/window_extra.go
   - darwin: v2/internal/frontend/desktop/darwin/window_extra.go
-
