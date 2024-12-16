@@ -92,16 +92,6 @@ type MonitorInfo struct {
 	Scale float64
 }
 
-type WindowState int
-
-const (
-	WindowStateUnknown WindowState = iota
-	WindowStateNormal
-	WindowStateMinimized
-	WindowStateMaximized
-	WindowStateFullscreen
-)
-
 // MessageDialogOptions contains the options for the Message dialogs, EG Info, Warning, etc runtime methods
 type MessageDialogOptions struct {
 	Type          DialogType
@@ -159,7 +149,7 @@ type Frontend interface {
 	WindowIsFullscreen() bool
 	WindowClose()
 	WindowPrint()
-	WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo, state WindowState)
+	WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo)
 	WindowSetBounds(bounds ScreenRect)
 
 	// Screen
