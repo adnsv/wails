@@ -184,3 +184,18 @@ func WindowPrint(ctx context.Context) {
 	appFrontend := getFrontend(ctx)
 	appFrontend.WindowPrint()
 }
+
+// WindowGetPlacement returns the current window bounds and monitor information
+func WindowGetPlacement(ctx context.Context) (bounds ScreenRect, monitor MonitorInfo) {
+	if f := getFrontend(ctx); f != nil {
+		bounds, monitor = f.WindowGetPlacement()
+	}
+	return
+}
+
+// WindowSetBounds sets the window bounds in screen units
+func WindowSetBounds(ctx context.Context, bounds ScreenRect) {
+	if f := getFrontend(ctx); f != nil {
+		f.WindowSetBounds(bounds)
+	}
+}
