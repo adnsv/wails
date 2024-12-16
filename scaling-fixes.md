@@ -148,18 +148,8 @@ func MonitorGetAll() ([]MonitorInfo, error)
 ### API for querying window placement
 
 ```go
-type WindowState int
-
-const (
-    WindowStateUnknown WindowState = iota
-    WindowStateNormal
-    WindowStateMinimized
-    WindowStateMaximized
-    WindowStateFullscreen
-)
-
 // WindowGetPlacement returns the current placement of the window
-func WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo, state WindowState)
+func WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo)
 ```
 
 ### API for setting placement for a window
@@ -167,15 +157,6 @@ func WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo, state WindowS
 ```go
 // WindowSetBounds sets the bounds of the window, in screen units
 func WindowSetBounds(bounds ScreenRect)
-```
-
-Existing functions can be used to set the window state:
-
-```go
-WindowSetMaximized()
-WindowSetMinimized()
-WindowSetFullscreen()
-WindowSetNormal()
 ```
 
 ### Implementation Phase 1
@@ -189,7 +170,7 @@ WindowSetNormal()
 
 ```go
 func MonitorGetAll() ([]MonitorInfo, error)
-func WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo, state WindowState)
+func WindowGetPlacement() (bounds ScreenRect, monitor MonitorInfo)
 func WindowSetBounds(bounds ScreenRect)
 ```
 
