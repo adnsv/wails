@@ -20,7 +20,7 @@ platforms due to their distinct coordinate systems and DPI handling approaches:
   scaling will be properly supported.
 
 - **macOS**: Uses points (logical pixels) consistently throughout its APIs. The
-  system handles most scaling automatically, with `backingScaleFactor` providing
+  system handles most scaling automatically, providing
   the conversion to physical pixels when needed.
 
 ## Terminology
