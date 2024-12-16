@@ -1,11 +1,16 @@
 package windows
 
 import (
+	"runtime"
+
 	"github.com/wailsapp/wails/v2/internal/frontend"
 	"github.com/wailsapp/wails/v2/internal/frontend/desktop/windows/winc/w32"
 )
 
 func (f *Frontend) WindowGetPlacement() (bounds frontend.ScreenRect, monitor frontend.MonitorInfo) {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
 	// Get window rect - actual position in pixels, which matches screen units on Windows systems
 	rect := w32.GetWindowRect(f.mainWindow.Handle())
 
@@ -48,9 +53,25 @@ func (f *Frontend) WindowGetPlacement() (bounds frontend.ScreenRect, monitor fro
 }
 
 func (f *Frontend) WindowSetBounds(bounds frontend.ScreenRect) {
-	f.mainWindow.Invoke(func() {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+	w32.SetWindowPos(f.mainWindow.Handle(), 0,
+		bounds.X, bounds.Y, bounds.Width, bounds.Height,
+		w32.SWP_NOZORDER|w32.SWP_NOACTIVATE)
+
+	// note, if a windows moves to a new monitor during SetWindowPos call, a
+	// system will call WM_DPICHANGED message. The existing handler inside
+	// window.go as of time of this writing, moves a window to the suggested
+	// position, which is not what we want. So far, the best workaround is to
+	// check if the resulting position is different from what we requested and
+	// repeat the call.
+
+	r := w32.GetWindowRect(f.mainWindow.Handle())
+	if int(r.Left) != bounds.X || int(r.Top) != bounds.Y ||
+		int(r.Right-r.Left) != bounds.Width ||
+		int(r.Bottom-r.Top) != bounds.Height {
 		w32.SetWindowPos(f.mainWindow.Handle(), 0,
 			bounds.X, bounds.Y, bounds.Width, bounds.Height,
 			w32.SWP_NOZORDER|w32.SWP_NOACTIVATE)
-	})
+	}
 }
