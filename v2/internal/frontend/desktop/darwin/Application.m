@@ -192,6 +192,50 @@ const char* GetPosition(void *inctx) {
     return [result UTF8String];
 }
 
+void SetBounds(void *inctx, int x, int y, int width, int height) {
+    WailsContext *ctx = (__bridge WailsContext*) inctx;
+    ON_MAIN_THREAD(
+       [ctx SetBounds:x :y :width :height];
+    );
+}
+
+const bool GetPlacement(void *inctx, 
+    int* x, int* y, int* width, int* height, 
+    int* monX, int* monY, int* monWidth, int* monHeight,
+    int* workX, int* workY, int* workWidth, int* workHeight) {
+
+    WailsContext *ctx = (__bridge WailsContext*) inctx;
+    NSRect windowFrame = [ctx.mainWindow frame];
+    NSScreen* screen = [ctx getCurrentScreen];
+    NSRect monitorFrame = [screen frame];
+    NSRect workAreaFrame = [screen visibleFrame];
+    
+    // Get primary screen for coordinate conversion
+    NSScreen* primaryScreen = [[NSScreen screens] objectAtIndex:0];
+    NSRect primaryFrame = [primaryScreen frame];
+
+    *width = windowFrame.size.width;
+    *height = windowFrame.size.height;
+    *x = windowFrame.origin.x;
+    // Convert window Y from bottom-left to top-left
+    *y = primaryFrame.size.height - (windowFrame.origin.y + windowFrame.size.height);
+
+    *monWidth = monitorFrame.size.width;
+    *monHeight = monitorFrame.size.height;
+    *monX = monitorFrame.origin.x;
+    // Convert monitor Y from bottom-left to top-left
+    *monY = primaryFrame.size.height - (monitorFrame.origin.y + monitorFrame.size.height);
+
+    *workWidth = workAreaFrame.size.width;
+    *workHeight = workAreaFrame.size.height;
+    *workX = workAreaFrame.origin.x;
+    // Convert work area Y from bottom-left to top-left
+    *workY = primaryFrame.size.height - (workAreaFrame.origin.y + workAreaFrame.size.height);
+
+    return true;
+}
+
+
 const bool IsFullScreen(void *inctx) {
     WailsContext *ctx = (__bridge WailsContext*) inctx;
     return [ctx IsFullScreen];

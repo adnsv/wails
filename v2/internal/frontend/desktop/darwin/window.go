@@ -191,6 +191,10 @@ func (w *Window) SetSize(width int, height int) {
 	C.SetSize(w.context, C.int(width), C.int(height))
 }
 
+func (w *Window) SetBounds(x int, y int, width int, height int) {
+	C.SetBounds(w.context, C.int(x), C.int(y), C.int(width), C.int(height))
+}
+
 func (w *Window) SetAlwaysOnTop(onTop bool) {
 	C.SetAlwaysOnTop(w.context, bool2Cint(onTop))
 }
@@ -292,6 +296,30 @@ func (w *Window) Size() (int, int) {
 	var _result *C.char = C.GetSize(w.context)
 	temp := C.GoString(_result)
 	return parseIntDuo(temp)
+}
+
+func (w *Window) GetPlacement() (wx int, wy int, ww int, wh int, mx int, my int, mw int, mh int, vx int, vy int, vw int, vh int) {
+	var _wx, _wy, _ww, _wh, _mx, _my, _mw, _mh, _vx, _vy, _vw, _vh C.int
+
+	C.GetPlacement(w.context,
+		&_wx, &_wy, &_ww, &_wh,
+		&_mx, &_my, &_mw, &_mh,
+		&_vx, &_vy, &_vw, &_vh)
+
+	wx = int(_wx)
+	wy = int(_wy)
+	ww = int(_ww)
+	wh = int(_wh)
+	mx = int(_mx)
+	my = int(_my)
+	mw = int(_mw)
+	mh = int(_mh)
+	vx = int(_vx)
+	vy = int(_vy)
+	vw = int(_vw)
+	vh = int(_vh)
+
+	return
 }
 
 func (w *Window) SetApplicationMenu(inMenu *menu.Menu) {

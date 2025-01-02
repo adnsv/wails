@@ -62,6 +62,19 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     [self.mainWindow setFrame:windowFrame display:TRUE animate:FALSE];
 }
 
+- (void) SetBounds:(int)x :(int)y :(int)width :(int)height {
+    if (self.shuttingDown) return;
+
+    NSScreen* primaryScreen = [[NSScreen screens] objectAtIndex:0];
+    NSRect primaryFrame = [primaryScreen frame];
+
+    // Convert y from top-left to bottom-left coordinate system
+    int convertedY = primaryFrame.size.height - y - height;
+
+    NSRect frame = { x, convertedY, width, height };
+    [self.mainWindow setFrame:frame display:TRUE animate:FALSE];
+}
+
 - (void) SetMinSize:(int)minWidth :(int)minHeight {
 
     if (self.shuttingDown) return;
