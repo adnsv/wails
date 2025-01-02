@@ -9,8 +9,16 @@ package darwin
 
 #include <Cocoa/Cocoa.h>
 
-void getScreenInfo(NSScreen* screen, int* x, int* y, int* width, int* height,
+int getMonitorCount() {
+    return [[NSScreen screens] count];
+}
+
+void getScreenInfo(int index, int* x, int* y, int* width, int* height,
                   int* workX, int* workY, int* workWidth, int* workHeight) {
+
+	NSArray<NSScreen *> *screens = [NSScreen screens];
+	NSScreen* screen = [screens objectAtIndex:index];
+
     NSRect frame = [screen frame];
     NSRect visibleFrame = [screen visibleFrame];
 
@@ -33,36 +41,39 @@ import (
 func (f *Frontend) MonitorGetAll() ([]frontend.MonitorInfo, error) {
 	var monitors []frontend.MonitorInfo
 
-	// Get NSScreen array
-	screens := C.NSScreen.screens()
-	count := C.NSArray_count(screens)
+	count := C.getMonitorCount()
+
+	// Get main screen height for Y-coordinate conversion
+	var mainX, mainY, mainWidth, mainHeight C.int
+	var mainWorkX, mainWorkY, mainWorkWidth, mainWorkHeight C.int
+	C.getScreenInfo(0, &mainX, &mainY, &mainWidth, &mainHeight,
+		&mainWorkX, &mainWorkY, &mainWorkWidth, &mainWorkHeight)
 
 	// Iterate through screens
-	for i := C.NSUInteger(0); i < count; i++ {
-		screen := C.NSArray_objectAtIndex(screens, i)
-		if screen == nil {
-			continue
-		}
-
+	for index := C.int(0); index < count; index++ {
 		var x, y, width, height C.int
 		var workX, workY, workWidth, workHeight C.int
 
 		// Get screen information
-		C.getScreenInfo(screen,
+		C.getScreenInfo(index,
 			&x, &y, &width, &height,
 			&workX, &workY, &workWidth, &workHeight)
+
+		// Convert Y coordinates by subtracting from main screen height
+		convertedY := int(mainHeight) - (int(y) + int(height))
+		convertedWorkY := int(mainHeight) - (int(workY) + int(workHeight))
 
 		// Convert to our format
 		monitorInfo := frontend.MonitorInfo{
 			Bounds: frontend.ScreenRect{
 				X:      int(x),
-				Y:      int(y),
+				Y:      convertedY,
 				Width:  int(width),
 				Height: int(height),
 			},
 			WorkArea: frontend.ScreenRect{
 				X:      int(workX),
-				Y:      int(workY),
+				Y:      convertedWorkY,
 				Width:  int(workWidth),
 				Height: int(workHeight),
 			},

@@ -49,6 +49,12 @@ const bool IsFullScreen(void *ctx);
 const bool IsMinimised(void *ctx);
 const bool IsMaximised(void *ctx);
 
+void SetBounds(void *ctx, int x, int y, int width, int height);
+const bool GetPlacement(void *ctx, 
+    int* x, int* y, int* width, int* height, 
+    int* monX, int* monY, int* monWidth, int* monHeight,
+    int* workX, int* workY, int* workWidth, int* workHeight);
+
 /* Dialogs */
 
 void MessageDialog(void *inctx, const char* dialogType, const char* title, const char* message, const char* button1, const char* button2, const char* button3, const char* button4, const char* defaultButton, const char* cancelButton, void* iconData, int iconDataLength);

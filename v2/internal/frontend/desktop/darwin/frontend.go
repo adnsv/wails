@@ -240,6 +240,36 @@ func (f *Frontend) WindowGetSize() (int, int) {
 	return f.mainWindow.Size()
 }
 
+func (f *Frontend) WindowSetBounds(bounds frontend.ScreenRect) {
+	f.mainWindow.SetBounds(bounds.X, bounds.Y, bounds.Width, bounds.Height)
+}
+
+func (f *Frontend) WindowGetPlacement() (bounds frontend.ScreenRect, monitor frontend.MonitorInfo) {
+	wx, wy, ww, wh, mx, my, mw, mh, vx, vy, vw, vh := f.mainWindow.GetPlacement()
+	bounds = frontend.ScreenRect{
+		X:      int(wx),
+		Y:      int(wy),
+		Width:  int(ww),
+		Height: int(wh),
+	}
+	monitor = frontend.MonitorInfo{
+		Bounds: frontend.ScreenRect{
+			X:      int(mx),
+			Y:      int(my),
+			Width:  int(mw),
+			Height: int(mh),
+		},
+		WorkArea: frontend.ScreenRect{
+			X:      int(vx),
+			Y:      int(vy),
+			Width:  int(vw),
+			Height: int(vh),
+		},
+		Scale: 1.0,
+	}
+	return
+}
+
 func (f *Frontend) WindowSetTitle(title string) {
 	f.mainWindow.SetTitle(title)
 }
