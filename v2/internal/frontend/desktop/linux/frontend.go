@@ -298,6 +298,14 @@ func (f *Frontend) WindowGetSize() (int, int) {
 	return f.mainWindow.Size()
 }
 
+func (f *Frontend) WindowSetBounds(bounds frontend.ScreenRect) {
+	f.mainWindow.SetBounds(bounds.X, bounds.Y, bounds.Width, bounds.Height)
+}
+
+func (f *Frontend) WindowGetPlacement() (bounds frontend.ScreenRect, monitor frontend.MonitorInfo) {
+	return f.mainWindow.WindowGetPlacement()
+}
+
 func (f *Frontend) WindowSetTitle(title string) {
 	f.mainWindow.SetTitle(title)
 }

@@ -196,6 +196,12 @@ func (w *Window) SetPosition(x int, y int) {
 	})
 }
 
+func (w *Window) SetBounds(x int, y int, width int, height int) {
+	invokeOnMainThread(func() {
+		C.SetBounds(unsafe.Pointer(w.asGTKWindow()), C.int(x), C.int(y), C.int(width), C.int(height))
+	})
+}
+
 func (w *Window) Size() (int, int) {
 	var width, height C.int
 	var wg sync.WaitGroup
@@ -218,6 +224,38 @@ func (w *Window) GetPosition() (int, int) {
 	})
 	wg.Wait()
 	return int(width), int(height)
+}
+
+func (w *Window) WindowGetPlacement() (bounds frontend.ScreenRect, monitor frontend.MonitorInfo) {
+	var wg sync.WaitGroup
+	wg.Add(1)
+	invokeOnMainThread(func() {
+		var b, m, wa C.GdkRectangle
+		var s C.double
+
+		C.GetWindowPlacement(w.asGTKWindow(), &b, &m, &wa, &s)
+
+		bounds.X = int(b.x)
+		bounds.Y = int(b.y)
+		bounds.Width = int(b.width)
+		bounds.Height = int(b.height)
+
+		monitor.Bounds.X = int(m.x)
+		monitor.Bounds.Y = int(m.y)
+		monitor.Bounds.Width = int(m.width)
+		monitor.Bounds.Height = int(m.height)
+
+		monitor.WorkArea.X = int(wa.x)
+		monitor.WorkArea.Y = int(wa.y)
+		monitor.WorkArea.Width = int(wa.width)
+		monitor.WorkArea.Height = int(wa.height)
+
+		monitor.Scale = float64(s)
+
+		wg.Done()
+	})
+	wg.Wait()
+	return bounds, monitor
 }
 
 func (w *Window) SetMaxSize(maxWidth int, maxHeight int) {
