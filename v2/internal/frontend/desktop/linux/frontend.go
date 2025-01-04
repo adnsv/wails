@@ -4,7 +4,7 @@
 package linux
 
 /*
-#cgo linux pkg-config: gtk+-3.0 
+#cgo linux pkg-config: gtk+-3.0
 #cgo !webkit2_41 pkg-config: webkit2gtk-4.0
 #cgo webkit2_41 pkg-config: webkit2gtk-4.1
 
@@ -271,6 +271,14 @@ func (f *Frontend) WindowSetSize(width, height int) {
 
 func (f *Frontend) WindowGetSize() (int, int) {
 	return f.mainWindow.Size()
+}
+
+func (f *Frontend) WindowSetBounds(bounds frontend.ScreenRect) {
+	f.mainWindow.SetBounds(bounds.X, bounds.Y, bounds.Width, bounds.Height)
+}
+
+func (f *Frontend) WindowGetPlacement() (bounds frontend.ScreenRect, monitor frontend.MonitorInfo) {
+	return f.mainWindow.WindowGetPlacement()
 }
 
 func (f *Frontend) WindowSetTitle(title string) {

@@ -3,7 +3,7 @@
 
 package linux
 
-// #cgo pkg-config: gtk+-3.0 webkit2gtk-4.0
+// #cgo pkg-config: gtk+-3.0
 // #include <gtk/gtk.h>
 // #include <gdk/gdk.h>
 // #include "window.h"
