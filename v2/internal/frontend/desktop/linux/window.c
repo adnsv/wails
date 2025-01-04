@@ -252,6 +252,71 @@ void SetPosition(void *window, int x, int y)
     ExecuteOnMainThread(setPosition, (gpointer)args);
 }
 
+static gboolean setBounds(gpointer data)
+{
+    const char *home = getenv("HOME");
+    char logpath[1024];
+    snprintf(logpath, sizeof(logpath), "%s/.setbounds.log", home);
+    FILE *logfile = fopen(logpath, "a");
+
+    SetBoundsArgs *args = (SetBoundsArgs *)data;
+
+    int x, y;
+    gtk_window_get_position(args->window, &x, &y);
+    fprintf(logfile, "get_position->x=%d, y=%d\n", x, y);
+
+    fprintf(logfile, "moving to x=%d, y=%d\n", args->x, args->y);
+
+    gtk_window_move(args->window, args->x, args->y);
+
+    gtk_window_get_position(args->window, &x, &y);
+    fprintf(logfile, "get_position->x=%d, y=%d\n", x, y);
+
+    gtk_window_resize(args->window, args->width, args->height);
+    free(args);
+
+    fprintf(logfile, "SetBounds(x=%d, y=%d, width=%d, height=%d)\n", args->x, args->y, args->width, args->height);
+    
+    fclose(logfile);
+
+    return G_SOURCE_REMOVE;
+}
+
+void SetBounds(void *window, int x, int y, int width, int height)
+{
+    SetBoundsArgs *args = malloc(sizeof(SetBoundsArgs));    
+    args->window = window;
+    args->x = x;
+    args->y = y;
+    args->width = width;
+    args->height = height;
+    ExecuteOnMainThread(setBounds, (gpointer)args);
+}
+
+bool GetWindowPlacement(GtkWindow *window, GdkRectangle *bounds, GdkRectangle *monitor, GdkRectangle *workarea, double *scale)
+{
+    if (!window)
+        return false;
+
+    GdkDisplay *gdisplay = gtk_widget_get_display(GTK_WIDGET(window));
+    GdkWindow *gwindow = gtk_widget_get_window(GTK_WIDGET(window));
+    if (!gdisplay || !gwindow)
+        return false;
+    GdkMonitor *gmonitor = gdk_display_get_monitor_at_window(gdisplay, gwindow);
+    if (!gmonitor)
+        return false;
+
+    gtk_window_get_position(window, &bounds->x, &bounds->y);
+    gtk_window_get_size(window, &bounds->width, &bounds->height);
+
+    gdk_monitor_get_geometry(gmonitor, monitor);
+    gdk_monitor_get_workarea(gmonitor, workarea);
+
+    *scale = (double)gdk_monitor_get_scale_factor(gmonitor);
+
+    return true;
+}
+
 void SetMinMaxSize(GtkWindow *window, int min_width, int min_height, int max_width, int max_height)
 {
     GdkGeometry size;

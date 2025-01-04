@@ -72,6 +72,15 @@ typedef struct SetPositionArgs
     void *window;
 } SetPositionArgs;
 
+typedef struct SetBoundsArgs
+{
+    void *window;
+    int x;
+    int y;
+    int width;
+    int height;
+} SetBoundsArgs;
+
 void ExecuteOnMainThread(void *f, gpointer jscallback);
 
 GtkWidget *GTKWIDGET(void *pointer);
@@ -87,6 +96,8 @@ void SetWindowTransparency(GtkWidget *widget);
 void SetBackgroundColour(void *data);
 void SetTitle(GtkWindow *window, char *title);
 void SetPosition(void *window, int x, int y);
+void SetBounds(void *window, int x, int y, int width, int height);
+bool GetWindowPlacement(GtkWindow *window, GdkRectangle *bounds, GdkRectangle *monitor, GdkRectangle *workarea, double *scale);
 void SetMinMaxSize(GtkWindow *window, int min_width, int min_height, int max_width, int max_height);
 void DisableContextMenu(void *webview);
 void ConnectButtons(void *webview);
