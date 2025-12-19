@@ -619,6 +619,19 @@ static gboolean onDragDrop(GtkWidget* self, GdkDragContext* context, gint x, gin
     return FALSE;
 }
 
+// Permission request handler for camera/microphone access
+static gboolean on_permission_request(WebKitWebView *webview,
+                                       WebKitPermissionRequest *request,
+                                       gpointer user_data) {
+    // Auto-allow camera and microphone (user media) permission requests
+    if (WEBKIT_IS_USER_MEDIA_PERMISSION_REQUEST(request)) {
+        webkit_permission_request_allow(request);
+        return TRUE;  // Request handled
+    }
+    // Let other permission types use default handling
+    return FALSE;
+}
+
 // WebView
 GtkWidget *SetupWebview(void *contentManager, GtkWindow *window, int hideWindowOnClose, int gpuPolicy, int disableWebViewDragAndDrop, int enableDragAndDrop)
 {
@@ -630,6 +643,10 @@ GtkWidget *SetupWebview(void *contentManager, GtkWindow *window, int hideWindowO
     WebKitWebContext *context = webkit_web_context_get_default();
     webkit_web_context_register_uri_scheme(context, "wails", (WebKitURISchemeRequestCallback)processURLRequest, NULL, NULL);
     g_signal_connect(G_OBJECT(webview), "load-changed", G_CALLBACK(webviewLoadChanged), NULL);
+
+    // Handle permission requests (camera, microphone)
+    g_signal_connect(G_OBJECT(webview), "permission-request",
+                     G_CALLBACK(on_permission_request), NULL);
 
     if(disableWebViewDragAndDrop)
     {
@@ -653,6 +670,10 @@ GtkWidget *SetupWebview(void *contentManager, GtkWindow *window, int hideWindowO
 
     WebKitSettings *settings = webkit_web_view_get_settings(WEBKIT_WEB_VIEW(webview));
     webkit_settings_set_user_agent_with_application_details(settings, "wails.io", "");
+
+    // Enable media stream and WebRTC for camera/microphone access (getUserMedia)
+    webkit_settings_set_enable_media_stream(settings, TRUE);
+    webkit_settings_set_enable_webrtc(settings, TRUE);
 
     switch (gpuPolicy)
     {
